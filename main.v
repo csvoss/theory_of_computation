@@ -150,65 +150,20 @@ Proof.
     apply EvalSteps.
     assumption. }
   { destruct 1.
-
-    remember (invert_output m) as m'.
-    revert m Heqm'.
-    induction H.
-    { admit. }
-    { intros.
-      rewrite (frob_eq (invert_output _)) in Heqm'.
-      
-    
     remember (invert_output m).
-    assert (forall b, eval_tm m0 b <-> eval_tm (invert_output m) b) as R.
-    { subst.
-      tauto. }
-    clear Heqm0.
-    revert m R.
+    rewrite (frob_eq (invert_output _)) in Heqm0.
+    revert m Heqm0.
     induction H; intros.
-    { destruct R with b.
-      specialize (H (EvalHalts b)).
-      remember (invert_output m) as m'.
-      rewrite (frob_eq (invert_output _)) in Heqm'.
-      revert m Heqm'.
-      induction H; intros.
-      { destruct m.
-        { destruct b0.
-          { discriminate. }
-          { apply EvalHalts. }
-        }
+    { destruct m.
+      { destruct b0.
         { discriminate. }
+        { apply EvalHalts. }
       }
+      { discriminate. }
+    }
+    { destruct m0.
       { apply IHeval_tm.
-        { intro.
-          destruct R with b0.
-          split.
-          { intro.
-            specialize (H1 H3).
-            inversion H1.
-            assumption. }
-          { intro.
-            apply H2.
-            apply EvalSteps.
-            assumption. } }
-        { intro.
-          apply EvalHalts. }
-        { 
-Admitted.
-
-(*
-      { destruct b0.
-        { destruct R with b.
-          specialize (H (EvalHalts b)).
-          rewrite (frob_eq (invert_output _)) in H.
-          inversion H; subst.
-          contradict H2.
-          apply looper_loops. }
-        { apply EvalHalts. } }
-      { discriminate. } }
-    { apply IHeval_tm.
-      destruct m0.
-      { destruct b0.
+        destruct b0.
         { injection Heqm0.
           intro.
           rewrite (frob_eq looper) in H0.
@@ -216,15 +171,14 @@ Admitted.
         { discriminate. } }
       { injection Heqm0.
         intro.
-        simpl.
-  
-  unfold invert_output.
-  eapply EvalHalts.
-  
-  destruct b.
-  
-Admitted.
-*)
+        constructor.
+        apply IHeval_tm.
+        rewrite <- frob_eq.
+        assumption.
+      }
+    }
+  }
+Qed.
 
 Lemma only_one_value:
   forall m a b,
